@@ -912,12 +912,14 @@ public class QuorumCnxManager {
                         LOG.info("Creating TLS-only quorum server socket");
                         ss = new UnifiedServerSocket(self.getX509Util(), false);
                     } else {
+                        //创建一个服务端的socket服务
                         ss = new ServerSocket();
                     }
 
                     ss.setReuseAddress(true);
 
                     if (self.getQuorumListenOnAllIPs()) {
+                        //获取选举端口  集群之间选举的通信端口
                         int port = self.getElectionAddress().getPort();
                         addr = new InetSocketAddress(port);
                     } else {
@@ -928,9 +930,10 @@ public class QuorumCnxManager {
                     }
                     LOG.info("{} is accepting connections now, my election bind port: {}", QuorumCnxManager.this.mySid, addr.toString());
                     setName(addr.toString());
-                    ss.bind(addr);
-                    while (!shutdown) {
+                    ss.bind(addr);//绑定选举端口地址
+                    while (!shutdown) {//默认是false 暂时还不能接受请求
                         try {
+                            //接口集群其他节点的请求
                             client = ss.accept();
                             setSockOpts(client);
                             LOG.info("Received connection request from {}", client.getRemoteSocketAddress());
